@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import sys
 import time
+import re
 
 class Global:
     USE = False
@@ -177,7 +178,12 @@ def main(args):
         # 駅名
         print_and_write(w, ",,")
         for name_tuple in all_name_tuple_seq2:
-            rename = name_tuple[0].replace(r'（[^（）]*）$', '').replace(r'〔[^〔〕]*〕$', '')
+            # 駅名の（福井県）や〔東福バス〕などを削除する
+            # （も）も含まない0文字以上の文字列を（）で囲んだ文字列にマッチする正規表現
+            # 〔〕も同様の処理
+            rename = name_tuple[0]
+            rename = re.sub('（[^（）]*）$', '', rename)
+            rename = re.sub('〔[^〔〕]*〕$', '', rename)
             if name_tuple[1]:
                 print_and_write(w, f"{rename},{rename},")
             else:
@@ -244,7 +250,6 @@ def main_process(uri, date_int, dir_int):
             href = li_ele.find('a')['href'] if li_ele.find('a') else ""
             uri_detail = "https://www.navitime.co.jp" + href
             shubetsu2 = li_ele.get('data-long-name', '')
-            import re
             number_pattern = re.compile(r'.*[0-9]+号.*')
             if number_pattern.match(shubetsu2):
                 number_pattern2 = re.compile(r'[0-9]+号.*')
@@ -258,7 +263,12 @@ def main_process(uri, date_int, dir_int):
             else:
                 shubetsu = li_ele.get('data-name', '')
 
-            dest = li_ele.get('data-dest', '').replace(r'（[^（）]*）$', '').replace(r'〔[^〔〕]*〕$', '')
+            # 駅名の（福井県）や〔東福バス〕などを削除する
+            # （も）も含まない0文字以上の文字列を（）で囲んだ文字列にマッチする正規表現
+            # 〔〕も同様の処理
+            dest = li_ele.get('data-dest', '')
+            dest = re.sub('（[^（）]*）$', '', dest)
+            dest = re.sub('〔[^〔〕]*〕$', '', dest)
             print(uri_detail)
             name_time_tuple_list = get_one_page(uri_detail)
             name_time_tuple_list_buf.append((shubetsu, dest, name_time_tuple_list))

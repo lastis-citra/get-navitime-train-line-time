@@ -87,9 +87,22 @@ def main(args):
         name_time_seq = name_time_seq_t[2]
         check_name_seq = [name_time_tuple[0] for name_time_tuple in name_time_seq]
         time_seq = []
+        matched_indices = {}
         for name in all_name_seq:
             if name in check_name_seq:
-                point = len(check_name_seq) - 1 - check_name_seq[::-1].index(name)
+                # この駅が何番目に出現するかをカウント
+                if name not in matched_indices:
+                    matched_indices[name] = 0
+                else:
+                    matched_indices[name] += 1
+                # check_name_seqで該当する出現番号のインデックスを見つける
+                count = 0
+                for j, check_name in enumerate(check_name_seq):
+                    if check_name == name:
+                        if count == matched_indices[name]:
+                            point = j
+                            break
+                        count += 1
                 time = name_time_seq[point][1]
                 if " " in time:
                     tmp = time.split(" ")
@@ -305,17 +318,17 @@ def create_name_seq_one(old_name_seq, check_point, check_name_seq):
         return old_name_seq
     check_name = check_name_seq[check_point]
     new_name_seq = old_name_seq
-    if check_name not in old_name_seq:
-        check_point_in_check = check_name_seq.index(check_name)
-        if check_point_in_check > 0:
-            pre_check_name = check_name_seq[check_point_in_check - 1]
-            if pre_check_name in old_name_seq:
-                split_point = old_name_seq.index(pre_check_name)
-                new_name_seq = old_name_seq[:split_point + 1] + [check_name] + old_name_seq[split_point + 1:]
-            else:
-                new_name_seq = [check_name] + old_name_seq
+    # 駅を常に追加（重複を許す）
+    if check_point > 0:
+        pre_check_name = check_name_seq[check_point - 1]
+        if pre_check_name in old_name_seq:
+            # 前の駅の最後の出現を見つける
+            split_point = len(old_name_seq) - 1 - old_name_seq[::-1].index(pre_check_name)
+            new_name_seq = old_name_seq[:split_point + 1] + [check_name] + old_name_seq[split_point + 1:]
         else:
             new_name_seq = [check_name] + old_name_seq
+    else:
+        new_name_seq = [check_name] + old_name_seq
     return create_name_seq_one(new_name_seq, check_point + 1, check_name_seq)
 
 def check_str_end(i, time_seq_seq):

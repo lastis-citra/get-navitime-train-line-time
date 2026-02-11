@@ -89,7 +89,7 @@ def main(args):
         time_seq = []
         for name in all_name_seq:
             if name in check_name_seq:
-                point = check_name_seq.index(name)
+                point = len(check_name_seq) - 1 - check_name_seq[::-1].index(name)
                 time = name_time_seq[point][1]
                 if " " in time:
                     tmp = time.split(" ")

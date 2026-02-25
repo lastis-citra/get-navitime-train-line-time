@@ -3,3 +3,4 @@
 result.csv
 tmp.csv
 *.conf
+*.egg-info

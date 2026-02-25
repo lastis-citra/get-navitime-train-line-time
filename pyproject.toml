@@ -1,0 +1,8 @@
+[project]
+name = "get-navitime-train-line-time"
+requires-python = ">=3.14"
+dynamic = ["version"]
+dependencies = [
+    "requests",
+    "beautifulsoup4",
+]

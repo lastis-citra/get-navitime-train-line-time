@@ -9,19 +9,49 @@ class Global:
     END = "横浜"
 
 def main(args):
+    # 引数の基本チェック -- 設定ファイルで上書きする可能性がある
     if len(args) < 3:
         print("Usage: python main.py <uris> <dateInts> <dirs> [read_file] [sort_targets]")
-        return
-
-    uri_array = args[0].split(',')
-    date_int_array = args[1].split(',')
-    dir_array = args[2].split(',')
+        # 設定ファイルから入力が得られればここでreturnしない
+    
+    # コマンドラインからのデフォルト値（argsが足りない場合は空配列）
+    uri_array = args[0].split(',') if len(args) >= 3 else []
+    date_int_array = args[1].split(',') if len(args) >= 3 else []
+    dir_array = args[2].split(',') if len(args) >= 3 else []
     read_file = len(args) > 3 and args[3] == "1"
     sort_target_array = args[4].split(',') if len(args) > 4 else []
 
     tmp_file_name = "tmp.csv"
     encode = "utf_8_sig"
+
+    # 設定ファイルが存在し、有効な行（コメントではない行）があれば
+    # 読み込み，コマンドライン入力を上書きする
+    config_inputs = []
+    try:
+        with open("input_url_list.conf", "r", encoding=encode) as conf:
+            for line in conf:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                # URL, 日付区分, 方向が最低限必要
+                parts = line.split(",")
+                if len(parts) >= 3:
+                    config_inputs.append(parts[:3])
+    except FileNotFoundError:
+        pass
+
+    if config_inputs:
+        print("Using inputs from input_url_list.conf")
+        uri_array = [item[0] for item in config_inputs]
+        date_int_array = [item[1] for item in config_inputs]
+        dir_array = [item[2] for item in config_inputs]
+    
     inputs = list(zip(uri_array, zip(date_int_array, dir_array)))
+    print(f"Final inputs: {inputs}")
+
+    if not inputs:
+        print("Error: no input URLs provided (either via command line or input_url_list.conf)")
+        return
 
     if not read_file:
         tmp_name_time_tuple_list_list_buf_array = []
@@ -34,7 +64,7 @@ def main(args):
 
         tmp_name_time_tuple_list_list_buf = [item for sublist in tmp_name_time_tuple_list_list_buf_array for item in sublist]
 
-        # 中間データを出力
+        # 中間データを出力（CSV形式）
         with open(tmp_file_name, 'w', encoding=encode, newline='') as tmp_file:
             # writer = csv.writer(tmp_file)
             writer = tmp_file.write

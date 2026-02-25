@@ -2,3 +2,4 @@
 /.venv/
 result.csv
 tmp.csv
+*.conf

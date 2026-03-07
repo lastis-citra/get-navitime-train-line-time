@@ -31,7 +31,7 @@ def main(args):
         with open("input_url_list.conf", "r", encoding=encode) as conf:
             for line in conf:
                 line = line.strip()
-                if not line or line.startswith("#"):
+                if not line or line.startswith("#") or line.startswith(";"):
                     continue
                 # URL, 日付区分, 方向が最低限必要
                 parts = line.split(",")

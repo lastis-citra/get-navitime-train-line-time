@@ -1,8 +1,8 @@
-import requests
 from bs4 import BeautifulSoup
 import sys
 import time
 import re
+import cloudscraper
 
 class Global:
     USE = False
@@ -406,14 +406,19 @@ def get_one_page(uri):
     # print("name_time_tuple_buf:", name_time_tuple_buf)
     return name_time_tuple_buf
 
-def get_data(uri):
-    try:
-        response = requests.get(uri)
-        response.raise_for_status()
-        return BeautifulSoup(response.text, 'html.parser')
-    except Exception as e:
-        print(e)
-        return get_data(uri)
+def get_data(url):
+    # print(f'download_url: {url}')
+    scraper = cloudscraper.create_scraper(
+        browser={
+            'browser': 'chrome',
+            'platform': 'windows',
+            'desktop': True
+        }
+    )
+    res = scraper.get(url)
+
+    soup = BeautifulSoup(res.content, 'html.parser')
+    return soup
 
 if __name__ == "__main__":
     main(sys.argv[1:])
